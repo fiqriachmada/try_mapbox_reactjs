@@ -1,24 +1,23 @@
-import React, { useState, useEffect, useRef } from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css'; // Import mapbox-gl CSS
-
+import React, { useState, useEffect, useRef } from "react";
+import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css"; // Import mapbox-gl CSS
 
 mapboxgl.accessToken =
-  'pk.eyJ1IjoiZmlxcmlhY2htYWRhIiwiYSI6ImNqb2M3czhpZjFzdzQzcW9kZGFlaGI3d2gifQ.Plxy3SnDq7g7gH_KPXJkBw';
+  "pk.eyJ1IjoiZmlxcmlhY2htYWRhIiwiYSI6ImNqb2M3czhpZjFzdzQzcW9kZGFlaGI3d2gifQ.Plxy3SnDq7g7gH_KPXJkBw";
 
 const MapboxComponent = () => {
-  const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
+  // const [state, setState] = useState({ longitude: null, latitude });
+  const [latitude, setLatitude] = useState(null);
   const [error, setError] = useState(null);
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
-  const markerRef = useRef(null);
 
   useEffect(() => {
     const watchId = navigator.geolocation.watchPosition(
       (position) => {
-        setLatitude(position.coords.latitude);
-        setLongitude(position.coords.longitude);
+        setLatitude(position.coords.latitude || 32.313268);
+        setLongitude(position.coords.longitude || 32.313268);
         setError(null); // Clear any previous error
       },
       (error) => {
@@ -37,7 +36,7 @@ const MapboxComponent = () => {
     if (mapContainerRef.current && !mapRef.current) {
       mapRef.current = new mapboxgl.Map({
         container: mapContainerRef.current,
-        style: 'mapbox://styles/mapbox/streets-v11',
+        style: "mapbox://styles/mapbox/streets-v11",
         center: [0, 0],
         zoom: 2,
       });
@@ -53,12 +52,12 @@ const MapboxComponent = () => {
 
       // Create a GeoJSON object to represent the user's location
       const geojson = {
-        type: 'FeatureCollection',
+        type: "FeatureCollection",
         features: [
           {
-            type: 'Feature',
+            type: "Feature",
             geometry: {
-              type: 'Point',
+              type: "Point",
               coordinates: [longitude, latitude],
             },
             properties: {},
@@ -67,23 +66,23 @@ const MapboxComponent = () => {
       };
 
       // Add the user location layer to the map
-      if (mapRef.current.getSource('user-location')) {
-        mapRef.current.getSource('user-location').setData(geojson);
+      if (mapRef.current.getSource("user-location")) {
+        mapRef.current.getSource("user-location").setData(geojson);
       } else {
-        mapRef.current.addSource('user-location', {
-          type: 'geojson',
+        mapRef.current.addSource("user-location", {
+          type: "geojson",
           data: geojson,
         });
 
         // Add a layer to the map
         mapRef.current.addLayer({
-          id: 'user-location',
-          type: 'circle',
-          source: 'user-location',
+          id: "user-location",
+          type: "circle",
+          source: "user-location",
           paint: {
-            'circle-radius': 10,
-            'circle-color': '#007cbf', // Blue color for the circle
-            'circle-opacity': 0.7,
+            "circle-radius": 10,
+            "circle-color": "#007cbf", // Blue color for the circle
+            "circle-opacity": 0.7,
           },
         });
       }
@@ -100,9 +99,13 @@ const MapboxComponent = () => {
 
   return (
     <div>
+      Map
+      <pre>{JSON.stringify(longitude, null, 2)}</pre>
+      <pre>{JSON.stringify(latitude, null, 2)}</pre>
+      {/* <pre>{JSON.stringify(state, null, 2)}</pre> */}
       <div
+        className="w-full"
         ref={mapContainerRef}
-        className="map-container"
         style={{ marginBottom: 20, marginTop: 10 }}
       />
       {error && <p>Error: {error}</p>}
